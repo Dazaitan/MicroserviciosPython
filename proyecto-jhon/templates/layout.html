@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Proyecto 1</title>
+    <<link rel="stylesheet" href="{{url_for('static',filename='css/formato.css')}}"/>
+    <script src="{{url_for('static',filename='js/eventos.js')}}">
+
+    </script>
+  </head>
+  <body>
+    <div id="principal">
+      <header>
+      </header>
+      <nav>
+        <ul>
+          <li><a href="{{url_for('qs')}}">nosotros</a></li>
+          <li><a href="{{url_for('productos')}}">Productos</a></li>
+          <li><a href="{{url_for('socios')}}">Socios</a></li>
+          <li><a href="{{url_for('contactos')}}">Contactos</a></li>
+        </ul>
+      </nav>
+      <article >
+
+      </article>
+      <footer>
+        {% block content %}
+
+        {% endblock %}
+      </footer>
+    </div>
+  </body>
+</html>
