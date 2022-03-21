@@ -29,6 +29,29 @@ def listado_categorias():
             }
         registros.append(datos)
     return jsonify({'resultado':registros})
+@app.route("/api/productos/all")
+def listado_platos():
+    cursor = conexion.connection.cursor()
+    listado_categorias = "SELECT * FROM res_productos;"
+    cursor.execute(listado_categorias)
+    cursor.connection.commit()
+    recordset = cursor.fetchall()
+    registros = []
+    for i in recordset:
+        datos = {
+            'pro_id' : i[0],
+            'pro_nombre' : i[1],
+            'pro_imagen' : i[2],
+            'pro_descripcion' : i[3],
+            'pro_ingredientes' : i[4],
+            'pro_cantidad' : i[5],
+            'pro_activo' : i[6],
+            'pro_obs' : i[7],
+            'pro_hora' : str(i[8]),
+            'pro_fecha' : str(i[9])
+            }
+        registros.append(datos)
+    return jsonify({'resultado':registros})
 @app.route("/api/categorias/<idc>", methods=['GET'])
 def categorias_x_id(idc):
     cursor = conexion.connection.cursor()
@@ -38,12 +61,33 @@ def categorias_x_id(idc):
     recordset = cursor.fetchone()
     if len(recordset) > 0:
         datos = {
-            'cat_id' :recordset[0],
+            'cat_id' : recordset[0],
             'cat_nombre' : recordset[1],
             'cat_imagen' : recordset[2],
             'cat_descripcion' : recordset[3],
             'cat_hora' : str(recordset[4]),
             'cat_fecha' : str(recordset[5])
+            }
+    return jsonify({'resultado':datos})
+@app.route("/api/productos/<idp>", methods=['GET'])
+def platos_x_id(idp):
+    cursor = conexion.connection.cursor()
+    busca_id = "SELECT * FROM res_productos WHERE pro_id = %s"
+    cursor.execute(busca_id,(idp))
+    conexion.connection.commit()
+    recordset = cursor.fetchone()
+    if len(recordset) > 0:
+        datos = {
+            'pro_id' : recordset[0],
+            'pro_nombre' : recordset[1],
+            'pro_imagen' : recordset[2],
+            'pro_descripcion' : recordset[3],
+            'pro_ingredientes' : recordset[4],
+            'pro_cantidad' : recordset[5],
+            'pro_activo' : recordset[6],
+            'pro_obs' : recordset[7],
+            'pro_hora' : str(recordset[8]),
+            'pro_fecha' : str(recordset[9])
             }
     return jsonify({'resultado':datos})
 @app.route("/api/categorias/nombre", methods = ['POST'])
@@ -69,6 +113,33 @@ def categorias_x_nombre():
                 }
             registros.append(datos)
             return jsonify({"Resultado: ":registros})
+@app.route("/api/platos/nombre", methods = ['POST'])
+def productos_x_nombre():
+    if request.method == 'POST':
+         cursor = conexion.connection.cursor()
+         nombreProducto = request.json['pro_nombre']
+         cadenaBusq= "%" + nombreProducto + "%"
+         buscar_nombre = "SELECT * FROM res_productos WHERE pro_nombre like %s"
+         cursor.execute(buscar_nombre, (cadenaBusq,))
+         conexion.connection.commit()
+         recordset = cursor.fetchall()
+         #if recordset[0]>0:
+         registros = []
+         for reg in recordset:
+            datos = {
+                'pro_id' : reg[0],
+                'pro_nombre' : reg[1],
+                'pro_imagen' : reg[2],
+                'pro_descripcion' : reg[3],
+                'pro_ingredientes' : reg[4],
+                'pro_cantidad' : reg[5],
+                'pro_activo' : reg[6],
+                'pro_obs' : reg[7],
+                'pro_hora': str(reg[8]),
+                'pro_fecha': str(reg[9])
+                }
+            registros.append(datos)
+            return jsonify({"Resultado: ":registros})
 @app.route("/api/categorias/insert", methods = ['POST'])
 def insertar_categorias():
     cursor = conexion.connection.cursor()
@@ -80,6 +151,28 @@ def insertar_categorias():
     cursor.execute(InserCat, datosInsert)
     conexion.connection.commit()
     return jsonify('INSERCION GUARDADA')
+@app.route("/api/productos/insert", methods = ['POST'])
+def insertar_producto():
+    cursor = conexion.connection.cursor()
+    pro_nombre = request.json['pro_nombre']
+    pro_codigo = request.json['pro_codigo']
+    pro_imagen = request.json['pro_imagen']
+    pro_cantidad = request.json['pro_cantidad']
+    pro_ingredientes = request.json ['pro_ingredientes']
+    pro_obs = request.json ['pro_obs']
+    pro_descripcion = request.json['pro_descripcion']
+    pro_hora = datetime.today().strftime('%H:%m')
+    pro_fecha = datetime.today().strftime('%Y-%m-%d')
+    datosInsert = (pro_nombre,pro_imagen,pro_descripcion,pro_cantidad,pro_ingredientes,pro_obs,pro_fecha,pro_hora,pro_codigo)
+    InserCat = "Insert Into res_productos(pro_nombre, pro_imagen, pro_descripcion, pro_cantidad, pro_ingredientes, pro_obs, pro_fecha, pro_hora, pro_codigo)VALUES(%s, %s, %s, %s, %s, %s, %s, %s);"
+    cursor.execute(InserCat, datosInsert)
+    conexion.connection.commit()
+    return jsonify('INSERCION GUARDADA')
+@app.route("/pedido/new", methods=['POST'])
+def nuevo_pedido():
+    if request.method == 'POST':
+        cat_id = request.json['cat_id']
+        
 @app.route("/")
 def homepage():
     return render_template('layout.html')
